@@ -78,3 +78,9 @@ import 'zone.js/dist/zone';  // Included with Angular CLI.
 /***************************************************************************************************
  * APPLICATION IMPORTS
  */
+
+// fix Angular 6 Uncaught ReferenceError: process is not defined
+// https://github.com/algolia/algoliasearch-client-javascript/issues/691
+(window as any).process = {
+    env: { DEBUG: undefined },
+};

@@ -1,4 +1,4 @@
-import {Link, User} from './types';
+import {Link, User, Vote} from './types';
 import gql from 'graphql-tag';
 
 export const ALL_LINKS_QUERY = gql`
@@ -8,6 +8,16 @@ export const ALL_LINKS_QUERY = gql`
       createdAt
       url
       description
+      postedBy {
+        id
+        name
+      }
+      votes {
+        id
+        user {
+          id
+        }
+      }
     }
   }
 `;
@@ -90,3 +100,128 @@ export interface SigninUserMutationResponse {
     user?: User
   };
 }
+
+export const CREATE_VOTE_MUTATION = gql`
+  mutation CreateVoteMutation($userId: ID!, $linkId: ID!) {
+    createVote(userId: $userId, linkId: $linkId) {
+      id
+      link {
+        votes {
+          id
+          user {
+            id
+          }
+        }
+      }
+      user {
+        id
+      }
+    }
+  }
+`;
+
+export interface CreateVoteMutationResponse {
+  loading: boolean;
+  createVote: {
+    id: string;
+    link: Link;
+    user: User;
+  };
+}
+
+export const ALL_LINKS_SEARCH_QUERY = gql`
+  query AllLinksSearchQuery($searchText: String!) {
+    allLinks(filter: {
+      OR: [{
+        url_contains: $searchText
+      }, {
+        description_contains: $searchText
+      }]
+    }) {
+      id
+      url
+      description
+      createdAt
+      postedBy {
+        id
+        name
+      }
+      votes {
+        id
+        user {
+          id
+        }
+      }
+    }
+  }
+`;
+
+export interface AllLinksSearchQueryResponse {
+  loading: boolean;
+  allLinks: Link[];
+}
+
+export const NEW_LINKS_SUBSCRIPTION = gql`
+  subscription {
+    Link(filter: {
+      mutation_in: [CREATED]
+    }) {
+      node {
+        id
+        url
+        description
+        createdAt
+        postedBy {
+          id
+          name
+        }
+        votes {
+          id
+          user {
+            id
+          }
+        }
+      }
+    }
+  }
+`;
+
+export interface NewLinkSubcriptionResponse {
+  node: Link;
+}
+
+export const NEW_VOTES_SUBSCRIPTION = gql`
+  subscription {
+    Vote(filter: {
+      mutation_in: [CREATED]
+    }) {
+      node {
+        id
+        link {
+          id
+          url
+          description
+          createdAt
+          postedBy {
+            id
+            name
+          }
+          votes {
+            id
+            user {
+              id
+            }
+          }
+        }
+        user {
+          id
+        }
+      }
+    }
+  }
+`;
+
+export interface NewVoteSubcriptionResponse {
+  node: Vote;
+}
+
